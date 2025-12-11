@@ -51,3 +51,8 @@ request-management-system/
 ├── requirements.txt    # Zależności
 └── templates/          # Szablony HTML
 ```
+## 🌐 Live Demo
+
+**Link do działającej aplikacji:** https://request-management-system-xxx.onrender.com
+
+*Uwaga: Pierwsze uruchomienie może zająć ~30 sekund.*

@@ -34,7 +34,7 @@ py app.py
 
 ## 📸 Screenshots
 
-[Dodaj tutaj screenshoty]
+![Strona główna](screenshots/home.png)
 
 ## 📂 Struktura projektu
 ```

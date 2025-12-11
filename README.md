@@ -34,8 +34,14 @@ py app.py
 
 ## 📸 Screenshots
 
+### Strona główna
 ![Strona główna](screenshots/home.png)
 
+### Formularz nowego wniosku
+![Nowy wniosek](screenshots/form.png)
+
+### Dashboard
+![Panel](screenshots/dashboard.png)
 ## 📂 Struktura projektu
 ```
 request-management-system/

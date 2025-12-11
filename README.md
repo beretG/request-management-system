@@ -53,6 +53,6 @@ request-management-system/
 ```
 ## 🌐 Live Demo
 
-**Link do działającej aplikacji:** https://request-management-system-xxx.onrender.com
+**Link do działającej aplikacji:** https://request-management-system-r214.onrender.com
 
 *Uwaga: Pierwsze uruchomienie może zająć ~30 sekund.*

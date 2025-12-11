@@ -1,0 +1,206 @@
+{% extends "base.html" %}
+
+{% block title %}Strona główna - System Wniosków{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h1 class="display-5 fw-bold">
+            <i class="bi bi-grid-3x3-gap text-primary"></i>
+            Panel główny
+        </h1>
+        <p class="lead text-muted">Przegląd wszystkich wniosków w systemie</p>
+    </div>
+</div>
+
+<!-- Statystyki -->
+<div class="row g-4 mb-5">
+    <div class="col-md-3">
+        <div class="card stat-card total">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <p class="text-muted mb-1 small">Wszystkie wnioski</p>
+                        <h2 class="mb-0">{{ total_requests }}</h2>
+                    </div>
+                    <div class="text-primary" style="font-size: 2.5rem;">
+                        <i class="bi bi-files"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card stat-card pending">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <p class="text-muted mb-1 small">Oczekujące</p>
+                        <h2 class="mb-0">{{ pending_requests }}</h2>
+                    </div>
+                    <div class="text-warning" style="font-size: 2.5rem;">
+                        <i class="bi bi-clock-history"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card stat-card approved">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <p class="text-muted mb-1 small">Zatwierdzone</p>
+                        <h2 class="mb-0">{{ approved_requests }}</h2>
+                    </div>
+                    <div class="text-success" style="font-size: 2.5rem;">
+                        <i class="bi bi-check-circle-fill"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card stat-card rejected">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <p class="text-muted mb-1 small">Odrzucone</p>
+                        <h2 class="mb-0">{{ rejected_requests }}</h2>
+                    </div>
+                    <div class="text-danger" style="font-size: 2.5rem;">
+                        <i class="bi bi-x-circle-fill"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Ostatnie wnioski -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-clock-history"></i>
+                    Ostatnie wnioski
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if recent_requests %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Typ</th>
+                                    <th>Pracownik</th>
+                                    <th>Dział</th>
+                                    <th>Data złożenia</th>
+                                    <th>Status</th>
+                                    <th>Priorytet</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for req in recent_requests %}
+                                <tr>
+                                    <td><strong>#{{ req.id }}</strong></td>
+                                    <td>
+                                        {% if req.request_type == 'Urlop' %}
+                                            <i class="bi bi-calendar-event text-info"></i> Urlop
+                                        {% else %}
+                                            <i class="bi bi-cart text-success"></i> Zakup
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ req.employee_name }}</td>
+                                    <td>{{ req.department }}</td>
+                                    <td>{{ req.submission_date.strftime('%d.%m.%Y %H:%M') }}</td>
+                                    <td>
+                                        {% if req.status == 'Oczekujący' %}
+                                            <span class="badge bg-warning text-dark badge-status">
+                                                <i class="bi bi-clock"></i> Oczekujący
+                                            </span>
+                                        {% elif req.status == 'Zatwierdzony' %}
+                                            <span class="badge bg-success badge-status">
+                                                <i class="bi bi-check-circle"></i> Zatwierdzony
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-danger badge-status">
+                                                <i class="bi bi-x-circle"></i> Odrzucony
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if req.priority == 'Wysoka' %}
+                                            <span class="badge bg-danger">Wysoka</span>
+                                        {% elif req.priority == 'Średnia' %}
+                                            <span class="badge bg-warning text-dark">Średnia</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Niska</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="bi bi-inbox" style="font-size: 4rem; color: #dee2e6;"></i>
+                        <p class="text-muted mt-3">Brak wniosków w systemie</p>
+                        <a href="{{ url_for('new_request') }}" class="btn btn-primary">
+                            <i class="bi bi-plus-circle"></i> Dodaj pierwszy wniosek
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Szybkie akcje -->
+<div class="row mt-4">
+    <div class="col-md-4">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="bi bi-plus-circle-fill text-primary" style="font-size: 3rem;"></i>
+                <h5 class="card-title mt-3">Nowy wniosek</h5>
+                <p class="card-text text-muted">Złóż wniosek urlopowy lub zakupowy</p>
+                <a href="{{ url_for('new_request') }}" class="btn btn-primary">
+                    Utwórz wniosek
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="bi bi-list-check text-success" style="font-size: 3rem;"></i>
+                <h5 class="card-title mt-3">Moje wnioski</h5>
+                <p class="card-text text-muted">Zobacz wszystkie złożone wnioski</p>
+                <a href="{{ url_for('my_requests') }}" class="btn btn-success">
+                    Przeglądaj
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="bi bi-graph-up text-info" style="font-size: 3rem;"></i>
+                <h5 class="card-title mt-3">Statystyki</h5>
+                <p class="card-text text-muted">Analizy i raporty</p>
+                <a href="{{ url_for('dashboard') }}" class="btn btn-info">
+                    Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

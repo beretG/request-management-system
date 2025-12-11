@@ -1,0 +1,280 @@
+<!-- templates/new_request.html -->
+{% extends "base.html" %}
+
+{% block title %}Nowy wniosek - System Wniosków{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">
+                    <i class="bi bi-file-earmark-plus"></i>
+                    Nowy wniosek
+                </h4>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('new_request') }}" id="requestForm">
+                    
+                    <!-- Typ wniosku -->
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">
+                            <i class="bi bi-ui-radios"></i>
+                            Typ wniosku <span class="text-danger">*</span>
+                        </label>
+                        <div class="btn-group w-100" role="group">
+                            <input type="radio" class="btn-check" name="request_type" id="type_leave" value="Urlop" required>
+                            <label class="btn btn-outline-primary" for="type_leave">
+                                <i class="bi bi-calendar-event"></i> Urlop
+                            </label>
+                            
+                            <input type="radio" class="btn-check" name="request_type" id="type_purchase" value="Zakup" required>
+                            <label class="btn btn-outline-primary" for="type_purchase">
+                                <i class="bi bi-cart"></i> Zakup
+                            </label>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <!-- Dane pracownika -->
+                    <h5 class="mb-3">
+                        <i class="bi bi-person"></i>
+                        Dane pracownika
+                    </h5>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="employee_name" class="form-label">
+                                Imię i nazwisko <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" class="form-control" id="employee_name" name="employee_name" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="employee_email" class="form-label">
+                                Email <span class="text-danger">*</span>
+                            </label>
+                            <input type="email" class="form-control" id="employee_email" name="employee_email" required>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="department" class="form-label">
+                                Dział <span class="text-danger">*</span>
+                            </label>
+                            <select class="form-select" id="department" name="department" required>
+                                <option value="">Wybierz dział...</option>
+                                {% for dept in departments %}
+                                    <option value="{{ dept.name }}">{{ dept.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="priority" class="form-label">
+                                Priorytet <span class="text-danger">*</span>
+                            </label>
+                            <select class="form-select" id="priority" name="priority" required>
+                                <option value="Niska">Niska</option>
+                                <option value="Średnia" selected>Średnia</option>
+                                <option value="Wysoka">Wysoka</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <!-- Pola dla wniosku urlopowego -->
+                    <div id="leaveFields" style="display: none;">
+                        <h5 class="mb-3">
+                            <i class="bi bi-calendar-event"></i>
+                            Szczegóły urlopu
+                        </h5>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="leave_start_date" class="form-label">
+                                    Data rozpoczęcia <span class="text-danger">*</span>
+                                </label>
+                                <input type="date" class="form-control" id="leave_start_date" name="leave_start_date">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="leave_end_date" class="form-label">
+                                    Data zakończenia <span class="text-danger">*</span>
+                                </label>
+                                <input type="date" class="form-control" id="leave_end_date" name="leave_end_date">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="leave_reason" class="form-label">
+                                Powód urlopu <span class="text-danger">*</span>
+                            </label>
+                            <textarea class="form-control" id="leave_reason" name="leave_reason" rows="3" 
+                                      placeholder="Np. Urlop wypoczynkowy, urlop okolicznościowy, itp."></textarea>
+                        </div>
+
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i>
+                            <strong>Informacja:</strong> Ilość dni urlopu zostanie automatycznie obliczona na podstawie wybranych dat.
+                        </div>
+                    </div>
+
+                    <!-- Pola dla wniosku zakupowego -->
+                    <div id="purchaseFields" style="display: none;">
+                        <h5 class="mb-3">
+                            <i class="bi bi-cart"></i>
+                            Szczegóły zakupu
+                        </h5>
+
+                        <div class="mb-3">
+                            <label for="item_description" class="form-label">
+                                Opis przedmiotu/usługi <span class="text-danger">*</span>
+                            </label>
+                            <textarea class="form-control" id="item_description" name="item_description" rows="3" 
+                                      placeholder="Dokładny opis tego, co ma zostać zakupione"></textarea>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="quantity" class="form-label">
+                                    Ilość <span class="text-danger">*</span>
+                                </label>
+                                <input type="number" class="form-control" id="quantity" name="quantity" min="1" value="1">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="estimated_cost" class="form-label">
+                                    Szacowany koszt (PLN) <span class="text-danger">*</span>
+                                </label>
+                                <input type="number" class="form-control" id="estimated_cost" name="estimated_cost" 
+                                       min="0" step="0.01" placeholder="0.00">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="justification" class="form-label">
+                                Uzasadnienie biznesowe <span class="text-danger">*</span>
+                            </label>
+                            <textarea class="form-control" id="justification" name="justification" rows="4" 
+                                      placeholder="Dlaczego ten zakup jest potrzebny? Jakie korzyści przyniesie?"></textarea>
+                        </div>
+
+                        <div class="alert alert-warning">
+                            <i class="bi bi-exclamation-triangle"></i>
+                            <strong>Uwaga:</strong> Wnioski zakupowe o wartości powyżej 5000 PLN wymagają dodatkowej akceptacji działu finansowego.
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <!-- Przyciski -->
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('index') }}" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left"></i> Anuluj
+                        </a>
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="bi bi-send"></i> Wyślij wniosek
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Informacja pomocnicza -->
+        <div class="alert alert-light mt-3 border">
+            <h6><i class="bi bi-lightbulb"></i> Wskazówki:</h6>
+            <ul class="mb-0 small">
+                <li>Pola oznaczone <span class="text-danger">*</span> są wymagane</li>
+                <li>Wniosek zostanie automatycznie wysłany do managera Twojego działu</li>
+                <li>Otrzymasz powiadomienie email po rozpatrzeniu wniosku</li>
+                <li>Status wniosku możesz sprawdzić w sekcji "Moje wnioski"</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Przełączanie widoczności pól w zależności od typu wniosku
+    document.addEventListener('DOMContentLoaded', function() {
+        const leaveRadio = document.getElementById('type_leave');
+        const purchaseRadio = document.getElementById('type_purchase');
+        const leaveFields = document.getElementById('leaveFields');
+        const purchaseFields = document.getElementById('purchaseFields');
+
+        function toggleFields() {
+            if (leaveRadio.checked) {
+                leaveFields.style.display = 'block';
+                purchaseFields.style.display = 'none';
+                
+                // Ustaw pola urlopowe jako wymagane
+                document.getElementById('leave_start_date').required = true;
+                document.getElementById('leave_end_date').required = true;
+                document.getElementById('leave_reason').required = true;
+                
+                // Usuń wymaganie z pól zakupowych
+                document.getElementById('item_description').required = false;
+                document.getElementById('quantity').required = false;
+                document.getElementById('estimated_cost').required = false;
+                document.getElementById('justification').required = false;
+            } else if (purchaseRadio.checked) {
+                leaveFields.style.display = 'none';
+                purchaseFields.style.display = 'block';
+                
+                // Usuń wymaganie z pól urlopowych
+                document.getElementById('leave_start_date').required = false;
+                document.getElementById('leave_end_date').required = false;
+                document.getElementById('leave_reason').required = false;
+                
+                // Ustaw pola zakupowe jako wymagane
+                document.getElementById('item_description').required = true;
+                document.getElementById('quantity').required = true;
+                document.getElementById('estimated_cost').required = true;
+                document.getElementById('justification').required = true;
+            }
+        }
+
+        leaveRadio.addEventListener('change', toggleFields);
+        purchaseRadio.addEventListener('change', toggleFields);
+
+        // Walidacja dat
+        const startDate = document.getElementById('leave_start_date');
+        const endDate = document.getElementById('leave_end_date');
+
+        startDate.addEventListener('change', function() {
+            endDate.min = this.value;
+            if (endDate.value && endDate.value < this.value) {
+                endDate.value = this.value;
+            }
+        });
+
+        // Ustaw minimalną datę na dzisiaj
+        const today = new Date().toISOString().split('T')[0];
+        startDate.min = today;
+        endDate.min = today;
+
+        // Alert przy wysokim koszcie
+        document.getElementById('estimated_cost').addEventListener('input', function() {
+            const cost = parseFloat(this.value);
+            const warningAlert = purchaseFields.querySelector('.alert-warning');
+            
+            if (cost > 5000) {
+                warningAlert.classList.remove('alert-warning');
+                warningAlert.classList.add('alert-danger');
+            } else {
+                warningAlert.classList.remove('alert-danger');
+                warningAlert.classList.add('alert-warning');
+            }
+        });
+
+        // Animacja przy submit
+        document.getElementById('requestForm').addEventListener('submit', function(e) {
+            const submitBtn = this.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Wysyłanie...';
+        });
+    });
+</script>
+{% endblock %}

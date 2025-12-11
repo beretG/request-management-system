@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block title %}Moje wnioski - System Wniosków{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h1 class="display-6 fw-bold">
+            <i class="bi bi-list-check text-primary"></i>
+            Moje wnioski
+        </h1>
+    </div>
+    <div class="col-auto">
+        <a href="{{ url_for('new_request') }}" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Nowy wniosek
+        </a>
+    </div>
+</div>
+
+<!-- Filtry -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="GET" class="row g-3">
+            <div class="col-md-4">
+                <label class="form-label">Status:</label>
+                <select name="status" class="form-select" onchange="this.form.submit()">
+                    <option value="all" {% if status_filter == 'all' %}selected{% endif %}>Wszystkie</option>
+                    <option value="Oczekujący" {% if status_filter == 'Oczekujący' %}selected{% endif %}>Oczekujące</option>
+                    <option value="Zatwierdzony" {% if status_filter == 'Zatwierdzony' %}selected{% endif %}>Zatwierdzone</option>
+                    <option value="Odrzucony" {% if status_filter == 'Odrzucony' %}selected{% endif %}>Odrzucone</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Typ:</label>
+                <select name="type" class="form-select" onchange="this.form.submit()">
+                    <option value="all" {% if type_filter == 'all' %}selected{% endif %}>Wszystkie</option>
+                    <option value="Urlop" {% if type_filter == 'Urlop' %}selected{% endif %}>Urlop</option>
+                    <option value="Zakup" {% if type_filter == 'Zakup' %}selected{% endif %}>Zakup</option>
+                </select>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Lista wniosków -->
+{% if requests %}
+    {% for req in requests %}
+    <div class="card mb-3">
+        <div class="card-body">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <div class="d-flex align-items-center mb-2">
+                        <h5 class="mb-0 me-3">
+                            {% if req.request_type == 'Urlop' %}
+                                <i class="bi bi-calendar-event text-info"></i> Wniosek urlopowy
+                            {% else %}
+                                <i class="bi bi-cart text-success"></i> Wniosek zakupowy
+                            {% endif %}
+                            <span class="text-muted">#{{ req.id }}</span>
+                        </h5>
+                        {% if req.status == 'Oczekujący' %}
+                            <span class="badge bg-warning text-dark">
+                                <i class="bi bi-clock"></i> Oczekujący
+                            </span>
+                        {% elif req.status == 'Zatwierdzony' %}
+                            <span class="badge bg-success">
+                                <i class="bi bi-check-circle"></i> Zatwierdzony
+                            </span>
+                        {% else %}
+                            <span class="badge bg-danger">
+                                <i class="bi bi-x-circle"></i> Odrzucony
+                            </span>
+                        {% endif %}
+                    </div>
+                    
+                    <p class="text-muted mb-2">
+                        <i class="bi bi-person"></i> {{ req.employee_name }} |
+                        <i class="bi bi-building"></i> {{ req.department }} |
+                        <i class="bi bi-calendar"></i> {{ req.submission_date.strftime('%d.%m.%Y') }}
+                    </p>
+
+                    {% if req.request_type == 'Urlop' %}
+                        <p class="mb-1">
+                            <strong>Okres:</strong> {{ req.leave_start_date.strftime('%d.%m.%Y') }} - {{ req.leave_end_date.strftime('%d.%m.%Y') }}
+                            ({{ req.leave_days }} dni)
+                        </p>
+                        <p class="mb-0"><strong>Powód:</strong> {{ req.leave_reason }}</p>
+                    {% else %}
+                        <p class="mb-1"><strong>Przedmiot:</strong> {{ req.item_description }}</p>
+                        <p class="mb-0">
+                            <strong>Ilość:</strong> {{ req.quantity }} |
+                            <strong>Koszt:</strong> {{ "%.2f"|format(req.estimated_cost) }} PLN
+                        </p>
+                    {% endif %}
+
+                    {% if req.approver_comments %}
+                        <div class="alert alert-info mt-3 mb-0">
+                            <strong>Komentarz managera:</strong> {{ req.approver_comments }}
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="col-md-4 text-end">
+                    <div class="mb-2">
+                        <span class="badge {% if req.priority == 'Wysoka' %}bg-danger{% elif req.priority == 'Średnia' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">
+                            {{ req.priority }}
+                        </span>
+                    </div>
+                    {% if req.status == 'Zatwierdzony' %}
+                        <small class="text-muted d-block">
+                            Zatwierdził: {{ req.approver_name }}<br>
+                            {{ req.approval_date.strftime('%d.%m.%Y') }}
+                        </small>
+                    {% elif req.status == 'Odrzucony' %}
+                        <small class="text-muted d-block">
+                            Odrzucił: {{ req.approver_name }}<br>
+                            {{ req.approval_date.strftime('%d.%m.%Y') }}
+                        </small>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+{% else %}
+    <div class="card">
+        <div class="card-body text-center py-5">
+            <i class="bi bi-inbox" style="font-size: 4rem; color: #dee2e6;"></i>
+            <h5 class="mt-3">Brak wniosków</h5>
+            <p class="text-muted">Nie znaleziono wniosków spełniających kryteria</p>
+            <a href="{{ url_for('new_request') }}" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Dodaj wniosek
+            </a>
+        </div>
+    </div>
+{% endif %}
+{% endblock %}

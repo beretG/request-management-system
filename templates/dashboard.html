@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - System Wniosków{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+  <div class="col">
+    <h1 class="display-6 fw-bold">
+      <i class="bi bi-graph-up text-info"></i>
+      Dashboard & Statystyki
+    </h1>
+    <p class="text-muted">Analiza i raporty z systemu wniosków</p>
+  </div>
+</div>
+
+<div class="row g-4">
+  <!-- Wykres statusów -->
+  <div class="col-md-6">
+    <div class="card h-100">
+      <div class="card-header bg-white">
+        <h5 class="mb-0">
+          <i class="bi bi-pie-chart"></i> Wnioski według statusu
+        </h5>
+      </div>
+      <div class="card-body">
+        <canvas id="statusChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Wykres typów -->
+  <div class="col-md-6">
+    <div class="card h-100">
+      <div class="card-header bg-white">
+        <h5 class="mb-0">
+          <i class="bi bi-bar-chart"></i> Wnioski według typu
+        </h5>
+      </div>
+      <div class="card-body">
+        <canvas id="typeChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Wykres działów -->
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header bg-white">
+        <h5 class="mb-0">
+          <i class="bi bi-building"></i> Wnioski według działów
+        </h5>
+      </div>
+      <div class="card-body">
+        <canvas id="deptChart"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %} {% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  // Dane z backendu (już w formacie JSON)
+  const statusData = {{ stats_by_status | tojson }};
+  const typeData = {{ stats_by_type | tojson }};
+  const deptData = {{ stats_by_dept | tojson }};
+
+  // Wykres statusów (kołowy)
+  if (statusData.length > 0) {
+      new Chart(document.getElementById('statusChart'), {
+          type: 'pie',
+          data: {
+              labels: statusData.map(item => item.status),
+              datasets: [{
+                  data: statusData.map(item => item.count),
+                  backgroundColor: ['#ffc107', '#198754', '#dc3545']
+              }]
+          },
+          options: {
+              responsive: true,
+              plugins: {
+                  legend: { position: 'bottom' }
+              }
+          }
+      });
+  }
+
+  // Wykres typów (słupkowy)
+  if (typeData.length > 0) {
+      new Chart(document.getElementById('typeChart'), {
+          type: 'bar',
+          data: {
+              labels: typeData.map(item => item.type),
+              datasets: [{
+                  label: 'Liczba wniosków',
+                  data: typeData.map(item => item.count),
+                  backgroundColor: ['#0dcaf0', '#198754']
+              }]
+          },
+          options: {
+              responsive: true,
+              plugins: {
+                  legend: { display: false }
+              },
+              scales: {
+                  y: {
+                      beginAtZero: true,
+                      ticks: {
+                          stepSize: 1
+                      }
+                  }
+              }
+          }
+      });
+  }
+
+  // Wykres działów (poziomy słupkowy)
+  if (deptData.length > 0) {
+      new Chart(document.getElementById('deptChart'), {
+          type: 'bar',
+          data: {
+              labels: deptData.map(item => item.department),
+              datasets: [{
+                  label: 'Liczba wniosków',
+                  data: deptData.map(item => item.count),
+                  backgroundColor: '#0d6efd'
+              }]
+          },
+          options: {
+              indexAxis: 'y',
+              responsive: true,
+              plugins: {
+                  legend: { display: false }
+              },
+              scales: {
+                  x: {
+                      beginAtZero: true,
+                      ticks: {
+                          stepSize: 1
+                      }
+                  }
+              }
+          }
+      });
+  }
+</script>
+{% endblock %}

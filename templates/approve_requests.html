@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block title %}Wnioski do zatwierdzenia - System Wniosków{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h1 class="display-6 fw-bold">
+            <i class="bi bi-check-circle text-success"></i>
+            Wnioski do zatwierdzenia
+        </h1>
+        <p class="text-muted">Panel managera - zarządzanie wnioskami pracowników</p>
+    </div>
+</div>
+
+{% if requests %}
+    {% for req in requests %}
+    <div class="card mb-3 border-warning">
+        <div class="card-header bg-warning bg-opacity-10">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    {% if req.request_type == 'Urlop' %}
+                        <i class="bi bi-calendar-event text-info"></i> Wniosek urlopowy
+                    {% else %}
+                        <i class="bi bi-cart text-success"></i> Wniosek zakupowy
+                    {% endif %}
+                    #{{ req.id }}
+                </h5>
+                <span class="badge {% if req.priority == 'Wysoka' %}bg-danger{% elif req.priority == 'Średnia' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">
+                    Priorytet: {{ req.priority }}
+                </span>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-8">
+                    <h6><i class="bi bi-person-circle"></i> Dane pracownika</h6>
+                    <p class="mb-2">
+                        <strong>Imię i nazwisko:</strong> {{ req.employee_name }}<br>
+                        <strong>Email:</strong> {{ req.employee_email }}<br>
+                        <strong>Dział:</strong> {{ req.department }}<br>
+                        <strong>Data złożenia:</strong> {{ req.submission_date.strftime('%d.%m.%Y %H:%M') }}
+                    </p>
+
+                    <hr>
+
+                    {% if req.request_type == 'Urlop' %}
+                        <h6><i class="bi bi-calendar-check"></i> Szczegóły urlopu</h6>
+                        <p class="mb-2">
+                            <strong>Okres:</strong> {{ req.leave_start_date.strftime('%d.%m.%Y') }} - {{ req.leave_end_date.strftime('%d.%m.%Y') }}<br>
+                            <strong>Liczba dni:</strong> {{ req.leave_days }}<br>
+                            <strong>Powód:</strong> {{ req.leave_reason }}
+                        </p>
+                    {% else %}
+                        <h6><i class="bi bi-bag-check"></i> Szczegóły zakupu</h6>
+                        <p class="mb-2">
+                            <strong>Przedmiot:</strong> {{ req.item_description }}<br>
+                            <strong>Ilość:</strong> {{ req.quantity }}<br>
+                            <strong>Szacowany koszt:</strong> <span class="text-danger fw-bold">{{ "%.2f"|format(req.estimated_cost) }} PLN</span><br>
+                            <strong>Uzasadnienie:</strong> {{ req.justification }}
+                        </p>
+                    {% endif %}
+                </div>
+                <div class="col-md-4">
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            <h6 class="card-title">Decyzja</h6>
+                            <form method="POST" action="{{ url_for('approve_request', request_id=req.id) }}" class="mb-2">
+                                <input type="hidden" name="approver_name" value="Jan Manager">
+                                <input type="hidden" name="approver_email" value="manager@firma.pl">
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Komentarz (opcjonalnie):</label>
+                                    <textarea name="comments" class="form-control" rows="3" placeholder="Dodaj uwagi..."></textarea>
+                                </div>
+                                
+                                <button type="submit" class="btn btn-success w-100 mb-2">
+                                    <i class="bi bi-check-circle"></i> Zatwierdź
+                                </button>
+                            </form>
+                            
+                            <form method="POST" action="{{ url_for('reject_request', request_id=req.id) }}">
+                                <input type="hidden" name="approver_name" value="Jan Manager">
+                                <input type="hidden" name="approver_email" value="manager@firma.pl">
+                                <textarea name="comments" class="form-control mb-2" rows="2" placeholder="Powód odrzucenia..." required></textarea>
+                                <button type="submit" class="btn btn-danger w-100">
+                                    <i class="bi bi-x-circle"></i> Odrzuć
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+{% else %}
+    <div class="card">
+        <div class="card-body text-center py-5">
+            <i class="bi bi-check2-all" style="font-size: 4rem; color: #198754;"></i>
+            <h5 class="mt-3">Brak wniosków do zatwierdzenia</h5>
+            <p class="text-muted">Wszystkie wnioski zostały rozpatrzone</p>
+        </div>
+    </div>
+{% endif %}
+{% endblock %}
